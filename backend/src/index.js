@@ -1,3 +1,5 @@
+import { getBusiness, listBusinesses, listPublicReviews } from "./public-api.js";
+
 const DEFAULT_ALLOWED_METHODS = "GET, POST, OPTIONS";
 const DEFAULT_ALLOWED_HEADERS = "Content-Type, Authorization";
 
@@ -54,35 +56,44 @@ export default {
     const url = new URL(request.url);
 
     if (request.method === "OPTIONS") {
-      return new Response(null, {
-        status: 204,
-        headers: responseHeaders(request, env),
-      });
+      return new Response(null, { status: 204, headers: responseHeaders(request, env) });
     }
 
     if (request.method === "GET" && url.pathname === "/api/health") {
-      return json(request, env, {
-        status: "ok",
-        service: "checkreport-api",
-        environment: env.APP_ENV || "unset",
-      });
+      return json(request, env, { status: "ok", service: "checkreport-api", environment: env.APP_ENV || "unset" });
     }
 
     if (request.method === "GET" && url.pathname === "/api/ready") {
       if (!(await databaseReady(env))) {
-        return json(request, env, {
-          status: "not_ready",
-          reason: "database_unavailable",
-        }, 503);
+        return json(request, env, { status: "not_ready", reason: "database_unavailable" }, 503);
       }
-
       return json(request, env, { status: "ready" });
+    }
+
+    if (request.method === "GET" && url.pathname === "/api/businesses") {
+      if (!env.DB) return json(request, env, { error: "database_unavailable" }, 503);
+      try { return json(request, env, await listBusinesses(request, env)); }
+      catch { return json(request, env, { error: "service_unavailable" }, 503); }
+    }
+
+    const businessMatch = url.pathname.match(/^\/api\/businesses\/([a-z0-9-]+)$/i);
+    if (request.method === "GET" && businessMatch) {
+      if (!env.DB) return json(request, env, { error: "database_unavailable" }, 503);
+      try {
+        const result = await getBusiness(request, env, businessMatch[1]);
+        return result ? json(request, env, result) : json(request, env, { error: "not_found" }, 404);
+      } catch { return json(request, env, { error: "service_unavailable" }, 503); }
+    }
+
+    if (request.method === "GET" && url.pathname === "/api/reviews") {
+      if (!env.DB) return json(request, env, { error: "database_unavailable" }, 503);
+      try { return json(request, env, await listPublicReviews(request, env)); }
+      catch { return json(request, env, { error: "service_unavailable" }, 503); }
     }
 
     if (url.pathname.startsWith("/api/") && request.method !== "GET") {
       return json(request, env, { error: "method_not_allowed" }, 405);
     }
-
     return json(request, env, { error: "not_found" }, 404);
   },
 };
