@@ -9,6 +9,7 @@ This preview stage adds a read-only public API to the Cloudflare Worker scaffold
 - GET /api/businesses?q=...&limit=20 — searches approved businesses by name, website, social handle, or WhatsApp number.
 - GET /api/businesses/:slug — returns one approved profile and its published/resolved reviews.
 - GET /api/reviews?q=...&limit=20 — returns the public feed and searches provider name, website, or social handle, including older reviews not yet linked to a profile.
+- GET /api/reviews/:id — returns a published review with its published comments.
 
 List endpoints cap page sizes at 50. Review responses contain the complainant display name (or anonymous label), location, rating, service and experience. SQL uses bound parameters and does not query the private contact table.
 
