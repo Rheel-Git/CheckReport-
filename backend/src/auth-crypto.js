@@ -1,4 +1,5 @@
-const PASSWORD_ITERATIONS = 600_000;
+// Cloudflare Workers currently rejects PBKDF2 requests above 100,000 iterations.
+const PASSWORD_ITERATIONS = 100_000;
 const PASSWORD_SALT_BYTES = 16;
 const PASSWORD_HASH_BYTES = 32;
 const encoder = new TextEncoder();

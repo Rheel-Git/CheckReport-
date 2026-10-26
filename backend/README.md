@@ -36,7 +36,7 @@ List endpoints cap page sizes at 50. Review responses contain the complainant di
 - Registration requires Worker secrets RESEND_API_KEY and MAIL_FROM. `EMAIL_VERIFY_URL` is configured in `wrangler.jsonc` for the GitHub Pages verification screen. Until email delivery is configured, registration returns an unavailable response and creates no account.
 - Passwords use PBKDF2-HMAC-SHA256 with a per-account random salt; sessions store only a SHA-256 token digest, expire after 12 hours, and can be revoked.
 - Email verification links expire after 24 hours. Public registration cannot grant administrator access. Login and registration requests have IP-based rate limits.
-- The password hash uses 600,000 PBKDF2 iterations. Cloudflare Workers Free has a 10 ms CPU budget per request; confirm the plan's CPU budget and benchmark this hash in the deployed Worker before enabling sign-up. Do not lower the iteration count just to fit a plan limit.
+- Password hashing uses PBKDF2-HMAC-SHA256 with 100,000 iterations, the maximum currently accepted by Cloudflare Workers Web Crypto. Keep the 15-character minimum and revisit password hashing if the runtime adds a stronger supported KDF.
 - R2 will hold uploaded business and advert images when the upload stage is built.
 - Resend will send account and review notifications after email flows are implemented.
 - Secrets belong in Cloudflare Worker secrets or local .dev.vars; never commit API keys or passwords.

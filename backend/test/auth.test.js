@@ -5,7 +5,7 @@ import worker from "../src/index.js";
 
 test("passwords are stored as salted PBKDF2 digests and verified", async () => {
   const encoded = await hashPassword("a sufficiently long test passphrase");
-  assert.match(encoded, /^pbkdf2-sha256\$600000\$/);
+  assert.match(encoded, /^pbkdf2-sha256\$100000\$/);
   assert.equal(await verifyPassword("a sufficiently long test passphrase", encoded), true);
   assert.equal(await verifyPassword("a different long test passphrase", encoded), false);
   assert.equal(encoded.includes("a sufficiently long"), false);
