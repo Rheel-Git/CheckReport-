@@ -19,7 +19,6 @@ async function customerDashboard(env, user) {
         ORDER BY c.created_at DESC LIMIT 1) AS latestBusinessReply
     FROM reviews r
     LEFT JOIN businesses b ON b.id = r.business_id
-    LEFT JOIN review_private_details p ON p.review_id = r.id
     WHERE r.user_id = ?
     ORDER BY r.created_at DESC
     LIMIT ${MAX_DASHBOARD_ROWS}
