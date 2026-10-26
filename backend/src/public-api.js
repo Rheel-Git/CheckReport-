@@ -114,3 +114,28 @@ export async function listPublicReviews(request, env) {
 
   return { reviews: rows.results ?? [] };
 }
+
+export async function getPublicReview(env, id) {
+  const review = await env.DB.prepare(`
+    SELECT r.id, COALESCE(b.name, r.provider_name) AS businessName,
+      r.service_bought AS serviceBought, r.rating,
+      CASE WHEN r.is_anonymous = 1 THEN 'Anonymous reviewer'
+        ELSE COALESCE(NULLIF(r.display_name, ''), 'Community member') END AS displayName,
+      r.location, r.experience,
+      CASE WHEN r.status = 'resolved' THEN 1 ELSE 0 END AS isResolved,
+      r.created_at AS createdAt
+    FROM reviews r
+    LEFT JOIN businesses b ON b.id = r.business_id AND b.status = 'approved'
+    WHERE r.id = ? AND r.status IN ('published', 'resolved')
+    LIMIT 1
+  `).bind(id).first();
+  if (!review) return null;
+  const comments = await env.DB.prepare(`
+    SELECT c.id, COALESCE(NULLIF(c.author_name, ''), 'Community member') AS authorName,
+      c.is_business_owner AS isBusinessOwner, c.body, c.created_at AS createdAt
+    FROM review_comments c
+    WHERE c.review_id = ? AND c.status = 'published'
+    ORDER BY c.created_at ASC
+  `).bind(id).all();
+  return { review, comments: comments.results ?? [] };
+}
