@@ -34,7 +34,7 @@ async function derivePassword(password, salt, iterations, cryptoProvider) {
 }
 
 export async function hashPassword(password, cryptoProvider = globalThis.crypto) {
-  if (typeof password !== "string" || [...password].length < 15 || encoder.encode(password).length > 256) {
+  if (typeof password !== "string" || [...password].length < 8 || encoder.encode(password).length > 256) {
     throw new TypeError("password_out_of_range");
   }
 
