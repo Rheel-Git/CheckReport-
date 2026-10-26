@@ -133,6 +133,14 @@
       wrapMessage("Please sign in", "Your session is missing or has expired. Sign in to access your account.", "Log in", "index.html#login");
       return;
     }
+    if (error.code === "customer_account_required") {
+      wrapMessage("Customer account required", "This page is for customer accounts.", "Open business dashboard", "business-dashboard.html");
+      return;
+    }
+    if (error.code === "business_account_required") {
+      wrapMessage("Business account required", "This page is for business accounts.", "Open customer dashboard", "user-dashboard.html");
+      return;
+    }
     wrapMessage("Dashboard unavailable", error.message || "We could not load your account right now. Please try again.");
   });
 })();
