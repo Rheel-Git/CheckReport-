@@ -86,6 +86,7 @@ export async function getBusiness(request, env, slug) {
 
 export async function listPublicReviews(request, env) {
   const url = new URL(request.url);
+  const term = searchTerm(url.searchParams.get("q"));
   const limit = safeLimit(url.searchParams.get("limit"));
   const rows = await env.DB.prepare(`
     SELECT r.id,
@@ -103,9 +104,13 @@ export async function listPublicReviews(request, env) {
     LEFT JOIN businesses b ON b.id = r.business_id
       AND b.status = 'approved'
     WHERE r.status IN ('published', 'resolved')
+      AND (? IS NULL OR r.provider_name LIKE ? ESCAPE '\\'
+        OR r.provider_website LIKE ? ESCAPE '\\'
+        OR r.provider_social LIKE ? ESCAPE '\\'
+        OR b.name LIKE ? ESCAPE '\\')
     ORDER BY r.created_at DESC
     LIMIT ?
-  `).bind(limit).all();
+  `).bind(term, term, term, term, term, limit).all();
 
   return { reviews: rows.results ?? [] };
 }
