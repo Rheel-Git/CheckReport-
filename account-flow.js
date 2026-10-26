@@ -15,7 +15,9 @@
     setTimeout(() => node.classList.remove("show"), 3500);
   }
   function open(content) { $("#modal").innerHTML = content; $("#modalBg").classList.add("show"); }
-  function close() { $("#modalBg").classList.remove("show"); }
+  function closeModal() { $("#modalBg").classList.remove("show"); }
+  // Use a dedicated modal handler; Window.close() cannot close ordinary page dialogs.
+  window.crCloseModal = closeModal;
   function errorText(error) {
     const labels = {
       email_delivery_unavailable: "Email verification is not configured yet. Your account was not created. Please try again later.",
@@ -67,7 +69,7 @@
 
   window.crReview = () => {
     selectedBusiness = null; stars = 0;
-    open(`<button class="close" onclick="close()" aria-label="Close">×</button><div class="eyebrow">Your experience matters</div><h2>Write a review</h2><p class="sub">Search approved businesses first, so your review can join the correct profile. You can still continue if you do not find a match.</p>
+    open(`<button class="close" onclick="crCloseModal()" aria-label="Close">×</button><div class="eyebrow">Your experience matters</div><h2>Write a review</h2><p class="sub">Search approved businesses first, so your review can join the correct profile. You can still continue if you do not find a match.</p>
       <div class="field"><label for="crQuery">Business name, website, social handle, or WhatsApp number</label><div class="searchbox"><input id="crQuery" placeholder="Search approved businesses"><button class="btn" type="button" onclick="crSearchReview()">Search</button></div><div id="crResults" class="cr-list"></div><p id="crPicked" class="cr-note"></p></div>
       <div class="formgrid"><div class="field full"><label for="crProviderName">Provider or business name *</label><input id="crProviderName" required placeholder="Name as you know it"></div>
       <div class="field"><label for="crService">Service bought *</label><input id="crService" required placeholder="e.g. Kitchen tap installation"></div><div class="field"><label for="crWebsite">Provider website (optional)</label><input id="crWebsite" placeholder="https://"></div>
@@ -97,7 +99,7 @@
         businessId: selectedBusiness?.id || undefined,
       },
     };
-    open(`<button class="close" onclick="close()" aria-label="Close">×</button><div class="eyebrow">Almost there</div><h2>How should we identify you?</h2><p class="sub">Your email and phone are private. We’ll use them only for updates about this review.</p>
+    open(`<button class="close" onclick="crCloseModal()" aria-label="Close">×</button><div class="eyebrow">Almost there</div><h2>How should we identify you?</h2><p class="sub">Your email and phone are private. We’ll use them only for updates about this review.</p>
       <div class="field"><label>Display name</label><div class="radio-row"><label class="radio-pill"><input type="radio" name="crAnonymous" value="false" checked>Show my name</label><label class="radio-pill"><input type="radio" name="crAnonymous" value="true">Post anonymously</label></div></div>
       <div class="field"><label for="crName">Your name</label><input id="crName" placeholder="Your name"></div><div class="field"><label for="crLocation">Your location *</label><input id="crLocation" required placeholder="City, town or area"></div>
       <div class="field"><label for="crEmail">Email for updates *</label><input id="crEmail" type="email" required placeholder="you@example.com"></div><div class="field"><label for="crPhone">Phone for updates (optional)</label><input id="crPhone" placeholder="+234…"></div>
@@ -124,7 +126,7 @@
     catch { toast("This browser could not keep your draft. Please enable local storage and try again."); return; }
     window.crRegistrationRole = role;
     window.crRegistrationName = displayName || "";
-    open(`<button class="close" onclick="close()" aria-label="Close">×</button><div class="eyebrow">Create a secure account</div><h2>Create your password</h2><p class="sub">Use at least 15 characters. Your draft will be saved after email verification and sign-in.</p><div class="field"><label>Email address</label><input id="crAccountEmail" type="email" value="${h(email)}" readonly></div><div class="field"><label for="crAccountPassword">Password</label><input id="crAccountPassword" type="password" minlength="15" maxlength="256" autocomplete="new-password"></div><p id="crAccountError" class="cr-note" role="alert"></p><div class="modal-actions"><button class="btn ghost" onclick="crOpenLogin()">I already have an account</button><button class="btn" onclick="crRegister()">Create account</button></div>`);
+    open(`<button class="close" onclick="crCloseModal()" aria-label="Close">×</button><div class="eyebrow">Create a secure account</div><h2>Create your password</h2><p class="sub">Use at least 15 characters. Your draft will be saved after email verification and sign-in.</p><div class="field"><label>Email address</label><input id="crAccountEmail" type="email" value="${h(email)}" readonly></div><div class="field"><label for="crAccountPassword">Password</label><input id="crAccountPassword" type="password" minlength="15" maxlength="256" autocomplete="new-password"></div><p id="crAccountError" class="cr-note" role="alert"></p><div class="modal-actions"><button class="btn ghost" onclick="crOpenLogin()">I already have an account</button><button class="btn" onclick="crRegister()">Create account</button></div>`);
   }
 
   window.crRegister = async () => {
@@ -138,7 +140,7 @@
   };
 
   window.crBusiness = () => {
-    open(`<button class="close" onclick="close()" aria-label="Close">×</button><div class="eyebrow">For service providers</div><h2>Create your business profile</h2><p class="sub">Your profile remains private until an admin approves it. Look for an existing profile below before creating a new one.</p>
+    open(`<button class="close" onclick="crCloseModal()" aria-label="Close">×</button><div class="eyebrow">For service providers</div><h2>Create your business profile</h2><p class="sub">Your profile remains private until an admin approves it. Look for an existing profile below before creating a new one.</p>
       <div class="formgrid"><div class="field"><label for="crBizName">Business name *</label><input id="crBizName" placeholder="Your business name"></div><div class="field"><label for="crBizSite">Website or business page</label><input id="crBizSite" placeholder="https://"></div></div><button class="btn ghost" onclick="crCheckRegistration()">Check existing profiles</button><div id="crBizResults" class="cr-list"></div>
       <div class="formgrid" style="margin-top:12px"><div class="field"><label for="crBizService">Service type *</label><input id="crBizService" placeholder="e.g. Home services"></div><div class="field"><label for="crBizLocation">Business location *</label><input id="crBizLocation" placeholder="City, state or area"></div><div class="field"><label for="crBizPhone">Contact number</label><input id="crBizPhone" placeholder="+234…"></div><div class="field"><label for="crBizEmail">Contact email *</label><input id="crBizEmail" type="email" placeholder="hello@business.com"></div></div>
       <label class="radio-pill" style="margin:12px 0"><input id="crBizDraftConsent" type="checkbox"> Save my profile draft in this browser for up to 24 hours while I verify my email.</label><p class="cr-note">Logo upload will be enabled when secure image storage is connected. New profiles require administrator approval.</p><p id="crBizError" class="cr-note" role="alert"></p><button class="btn" onclick="crPrepareBusinessAccount()">Continue to account setup →</button>`);
@@ -171,12 +173,17 @@
       const response = await API.request(path, { method: "POST", body });
       localStorage.removeItem("checkreport.pendingDraft");
       const label = saved.type === "review" ? "Your review is awaiting admin moderation." : "Your business profile is awaiting admin approval.";
-      open(`<div class="success"><div class="check">✓</div><h2>Submitted successfully</h2><p>${h(label)}</p><p>Reference: ${h(response.review?.id || response.business?.id || "submitted")}</p><button class="btn" onclick="close()">Done</button></div>`);
+      open(`<div class="success"><div class="check">✓</div><h2>Submitted successfully</h2><p>${h(label)}</p><p>Reference: ${h(response.review?.id || response.business?.id || "submitted")}</p><button class="btn" onclick="crCloseModal()">Done</button></div>`);
       return "submitted";
     } catch (error) { return errorText(error); }
   }
 
-  window.crOpenLogin = () => open(`<button class="close" onclick="close()" aria-label="Close">×</button><div class="eyebrow">Welcome back</div><h2>Log in to CheckReport</h2><p class="sub">Sign in with the verified email address for your customer or business account.</p><div class="field"><label for="crLoginEmail">Email address</label><input id="crLoginEmail" type="email" autocomplete="username"></div><div class="field"><label for="crLoginPassword">Password</label><input id="crLoginPassword" type="password" autocomplete="current-password"></div><p id="crLoginError" class="cr-note" role="alert"></p><div class="modal-actions"><button class="btn ghost" onclick="close()">Cancel</button><button class="btn" onclick="crLogin()">Log in</button></div>`);
+  window.crOpenSignup = () => {
+    window.crRegistrationRole = "customer";
+    window.crRegistrationName = "";
+    open(`<button class="close" onclick="crCloseModal()" aria-label="Close">×</button><div class="eyebrow">Join CheckReport</div><h2>Create a customer account</h2><p class="sub">Verify your email to access your account. Admin access is assigned separately and cannot be selected during sign-up.</p><div class="field"><label for="crAccountEmail">Email address</label><input id="crAccountEmail" type="email" autocomplete="email" required></div><div class="field"><label for="crSignupName">Your name (optional)</label><input id="crSignupName" autocomplete="name"></div><div class="field"><label for="crAccountPassword">Password</label><input id="crAccountPassword" type="password" minlength="15" maxlength="256" autocomplete="new-password" required><small class="cr-note">Use at least 15 characters.</small></div><p id="crAccountError" class="cr-note" role="alert"></p><div class="modal-actions"><button class="btn ghost" onclick="crOpenLogin()">Back to log in</button><button class="btn" onclick="crRegister()">Create account</button></div>`);
+  };
+  window.crOpenLogin = () => open(`<button class="close" onclick="crCloseModal()" aria-label="Close">×</button><div class="eyebrow">Welcome back</div><h2>Log in to CheckReport</h2><p class="sub">Sign in with the verified email address for your customer or business account.</p><div class="field"><label for="crLoginEmail">Email address</label><input id="crLoginEmail" type="email" autocomplete="username"></div><div class="field"><label for="crLoginPassword">Password</label><input id="crLoginPassword" type="password" autocomplete="current-password"></div><p id="crLoginError" class="cr-note" role="alert"></p><div class="modal-actions"><button class="btn ghost" onclick="crOpenSignup()">Create an account</button><button class="btn ghost" onclick="crCloseModal()">Cancel</button><button class="btn" onclick="crLogin()">Log in</button></div>`);
   window.crLogin = async () => {
     const error = $("#crLoginError");
     try {
@@ -185,7 +192,7 @@
       const draftResult = await resumeDraft(data.user);
       if (draftResult && draftResult !== "submitted") { error.textContent = draftResult; return; }
       if (data.user.role === "admin") { location.href = "admin.html"; return; }
-      if (!draftResult) { close(); toast(`Signed in as ${data.user.email}. Account dashboards will connect in a later stage.`); }
+      if (!draftResult) { closeModal(); toast(`Signed in as ${data.user.email}. Account dashboards will connect in a later stage.`); }
     } catch (reason) { error.textContent = errorText(reason); }
   };
 
