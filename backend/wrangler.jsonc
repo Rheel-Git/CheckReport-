@@ -1,0 +1,13 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "checkreport-api",
+  "main": "src/index.js",
+  "compatibility_date": "2026-10-26",
+  "observability": {
+    "enabled": true
+  },
+  "vars": {
+    "APP_ENV": "preview",
+    "ALLOWED_ORIGINS": "http://localhost:8080,https://rheel-git.github.io"
+  }
+}
