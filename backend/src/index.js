@@ -1,4 +1,5 @@
 import { getBusiness, getPublicReview, listBusinesses, listPublicReviews } from "./public-api.js";
+import { authMethodAllowed, handleAuth, isAuthPath } from "./auth.js";
 
 const DEFAULT_ALLOWED_METHODS = "GET, POST, OPTIONS";
 const DEFAULT_ALLOWED_HEADERS = "Content-Type, Authorization";
@@ -57,6 +58,14 @@ export default {
 
     if (request.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: responseHeaders(request, env) });
+    }
+
+    if (isAuthPath(url.pathname)) {
+      if (!authMethodAllowed(url.pathname, request.method)) {
+        return json(request, env, { error: "method_not_allowed" }, 405);
+      }
+      const result = await handleAuth(request, env, url.pathname);
+      return json(request, env, result.body, result.status);
     }
 
     if (request.method === "GET" && url.pathname === "/api/health") {
