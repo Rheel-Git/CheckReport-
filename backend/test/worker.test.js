@@ -4,17 +4,16 @@ import worker from "../src/index.js";
 
 const env = { APP_ENV: "preview", ALLOWED_ORIGINS: "https://rheel-git.github.io,http://localhost:8080" };
 
-function databaseFixture({ businessRows = [], business = null, reviewRows = [] } = {}) {
+function databaseFixture({ businessRows = [], business = null, reviewRows = [], publicReview = null, commentRows = [] } = {}) {
   const queries = [];
   return { queries, DB: { prepare(sql) { return { bind(...values) {
     queries.push({ sql, values });
     return {
-      all: async () => ({ results: sql.includes("FROM businesses b") ? businessRows : reviewRows }),
-      first: async () => sql.includes("WHERE b.slug = ?") ? business : { ok: 1 },
+      all: async () => ({ results: sql.includes("FROM businesses b") ? businessRows : sql.includes("FROM review_comments") ? commentRows : reviewRows }),
+      first: async () => sql.includes("WHERE b.slug = ?") ? business : sql.includes("WHERE r.id = ?") ? publicReview : { ok: 1 },
     };
   }, first: async () => ({ ok: 1 }) }; } } };
 }
-
 test("health endpoint returns service status to the configured frontend", async () => {
   const response = await worker.fetch(new Request("https://api.example.test/api/health", { headers: { Origin: "https://rheel-git.github.io" } }), env);
   assert.equal(response.status, 200);
@@ -105,4 +104,25 @@ test("public data endpoints return unavailable when D1 is not bound", async () =
   const response = await worker.fetch(new Request("https://api.example.test/api/businesses"), env);
   assert.equal(response.status, 503);
   assert.deepEqual(await response.json(), { error: "database_unavailable" });
+});
+
+test("review details show published comments without private or unpublished data", async () => {
+  const review = { id: "r-1", businessName: "Acme Repairs", serviceBought: "Roof repair", rating: 5, displayName: "Anonymous reviewer", location: "Lagos", experience: "Clear communication.", isResolved: 0 };
+  const comment = { id: "c-1", authorName: "Business representative", isBusinessOwner: 1, body: "We have resolved this.", createdAt: "2026-10-26" };
+  const db = databaseFixture({ publicReview: review, commentRows: [comment] });
+  const response = await worker.fetch(new Request("https://api.example.test/api/reviews/r-1"), { ...env, ...db });
+  const result = await response.json();
+  assert.equal(response.status, 200);
+  assert.deepEqual(result, { review, comments: [comment] });
+  assert.doesNotMatch(JSON.stringify(result), /email|phone|password|token|userId/i);
+  assert.match(db.queries[1].sql, /c\.status =/);
+  assert.ok(db.queries.every(({ sql }) => !/review_private_details|complainant_email|complainant_phone/i.test(sql)));
+});
+
+test("review detail does not expose pending or deleted reviews", async () => {
+  const db = databaseFixture({ publicReview: null });
+  const response = await worker.fetch(new Request("https://api.example.test/api/reviews/pending-review"), { ...env, ...db });
+  assert.equal(response.status, 404);
+  assert.equal(db.queries.length, 1);
+  assert.match(db.queries[0].sql, /r\.status IN/);
 });
