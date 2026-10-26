@@ -1,0 +1,19 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "checkreport-api-preview",
+  "main": "src/index.js",
+  "compatibility_date": "2026-10-26",
+  "observability": { "enabled": true },
+  "vars": {
+    "APP_ENV": "preview",
+    "ALLOWED_ORIGINS": "http://localhost:8080,https://rheel-git.github.io",
+    "EMAIL_VERIFY_URL": "https://rheel-git.github.io/CheckReport-/verify.html"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "checkreport-preview",
+      "database_id": "7c45623f-7e54-4128-930d-49090b1ca5bc"
+    }
+  ]
+}
