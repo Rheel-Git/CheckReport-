@@ -12,7 +12,6 @@ async function customerDashboard(env, user) {
       CASE WHEN r.is_anonymous = 1 THEN 'Anonymous'
         ELSE COALESCE(NULLIF(r.display_name, ''), 'Community member') END AS displayName,
       r.location, r.experience, r.status, r.created_at AS createdAt,
-      p.complainant_phone AS phone,
       (SELECT COUNT(*) FROM review_comments c
         WHERE c.review_id = r.id AND c.is_business_owner = 1 AND c.status = 'published') AS replyCount,
       (SELECT c.body FROM review_comments c
