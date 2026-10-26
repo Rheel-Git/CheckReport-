@@ -1,4 +1,4 @@
-import { getBusiness, listBusinesses, listPublicReviews } from "./public-api.js";
+import { getBusiness, getPublicReview, listBusinesses, listPublicReviews } from "./public-api.js";
 
 const DEFAULT_ALLOWED_METHODS = "GET, POST, OPTIONS";
 const DEFAULT_ALLOWED_HEADERS = "Content-Type, Authorization";
@@ -89,6 +89,15 @@ export default {
       if (!env.DB) return json(request, env, { error: "database_unavailable" }, 503);
       try { return json(request, env, await listPublicReviews(request, env)); }
       catch { return json(request, env, { error: "service_unavailable" }, 503); }
+    }
+
+    const reviewMatch = url.pathname.match(/^\/api\/reviews\/([a-z0-9_-]{1,80})$/i);
+    if (request.method === "GET" && reviewMatch) {
+      if (!env.DB) return json(request, env, { error: "database_unavailable" }, 503);
+      try {
+        const result = await getPublicReview(env, reviewMatch[1]);
+        return result ? json(request, env, result) : json(request, env, { error: "not_found" }, 404);
+      } catch { return json(request, env, { error: "service_unavailable" }, 503); }
     }
 
     if (url.pathname.startsWith("/api/") && request.method !== "GET") {
