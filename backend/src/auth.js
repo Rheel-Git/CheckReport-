@@ -24,9 +24,9 @@ async function requestData(request) {
   try { return await request.json(); } catch { return null; }
 }
 
-async function limited(request, env, scope, limit, windowSeconds) {
+export async function rateLimited(request, env, scope, limit, windowSeconds, identity = "") {
   const ip = request.headers.get("CF-Connecting-IP") || "unknown";
-  const keyHash = await hashToken(`${scope}:${ip}`);
+  const keyHash = await hashToken(`${scope}:${identity}:${ip}`);
   const now = Math.floor(Date.now() / 1000);
   const windowStart = Math.floor(now / windowSeconds) * windowSeconds;
   await env.DB.prepare(`
@@ -126,7 +126,7 @@ async function login(request, env) {
   return { status: 200, body: { token, expiresAt, user: publicUser(user) } };
 }
 
-async function sessionUser(request, env) {
+export async function getSessionUser(request, env) {
   const authorization = request.headers.get("Authorization") || "";
   const match = authorization.match(/^Bearer ([A-Za-z0-9_-]{40,100})$/);
   if (!match) return null;
@@ -137,7 +137,7 @@ async function sessionUser(request, env) {
 }
 
 async function me(request, env) {
-  const user = await sessionUser(request, env);
+  const user = await getSessionUser(request, env);
   return user ? { status: 200, body: { user: publicUser(user) } } : { status: 401, body: { error: "unauthorized" } };
 }
 
@@ -153,15 +153,15 @@ export async function handleAuth(request, env, pathname) {
   if (!env.DB) return { status: 503, body: { error: "database_unavailable" } };
   try {
     if (pathname === "/api/auth/register" && request.method === "POST") {
-      if (await limited(request, env, "register", 5, 3600)) return { status: 429, body: { error: "rate_limited" } };
+      if (await rateLimited(request, env, "register", 5, 3600)) return { status: 429, body: { error: "rate_limited" } };
       return await register(request, env);
     }
     if (pathname === "/api/auth/verify-email" && request.method === "POST") {
-      if (await limited(request, env, "verify", 10, 3600)) return { status: 429, body: { error: "rate_limited" } };
+      if (await rateLimited(request, env, "verify", 10, 3600)) return { status: 429, body: { error: "rate_limited" } };
       return await verifyEmail(request, env);
     }
     if (pathname === "/api/auth/login" && request.method === "POST") {
-      if (await limited(request, env, "login", 10, 900)) return { status: 429, body: { error: "rate_limited" } };
+      if (await rateLimited(request, env, "login", 10, 900)) return { status: 429, body: { error: "rate_limited" } };
       return await login(request, env);
     }
     if (pathname === "/api/auth/me" && request.method === "GET") return await me(request, env);

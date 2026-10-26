@@ -1,5 +1,6 @@
 import { getBusiness, getPublicReview, listBusinesses, listPublicReviews } from "./public-api.js";
 import { authMethodAllowed, handleAuth, isAuthPath } from "./auth.js";
+import { handleSubmission, isSubmissionPath } from "./submission-api.js";
 
 const DEFAULT_ALLOWED_METHODS = "GET, POST, OPTIONS";
 const DEFAULT_ALLOWED_HEADERS = "Content-Type, Authorization";
@@ -66,6 +67,14 @@ export default {
       }
       const result = await handleAuth(request, env, url.pathname);
       return json(request, env, result.body, result.status);
+    }
+
+    if (isSubmissionPath(url.pathname) && request.method === "POST") {
+      const result = await handleSubmission(request, env, url.pathname);
+      return json(request, env, result.body, result.status);
+    }
+    if (isSubmissionPath(url.pathname) && request.method !== "GET") {
+      return json(request, env, { error: "method_not_allowed" }, 405);
     }
 
     if (request.method === "GET" && url.pathname === "/api/health") {
