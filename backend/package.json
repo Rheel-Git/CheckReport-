@@ -5,5 +5,8 @@
   "scripts": {
     "test": "node --test test/*.test.js",
     "dev": "npx wrangler dev"
+  },
+  "devDependencies": {
+    "wrangler": "^4.153.0"
   }
 }
