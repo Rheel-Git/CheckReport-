@@ -16,8 +16,9 @@ List endpoints cap page sizes at 50. Review responses contain the complainant di
 ## Current deployment model
 
 - The public site remains on GitHub Pages.
-- The API will run as a separate Cloudflare Worker.
-- D1 will hold relational records; R2 will hold uploaded business and advert images.
+- The preview API is deployed at https://checkreport-api-preview.ubamuoma.workers.dev.
+- The checkreport-preview D1 database has the core migration applied and is currently empty.
+- R2 will hold uploaded business and advert images when the upload stage is built.
 - Resend will send account and review notifications after email flows are implemented.
 - Secrets belong in Cloudflare Worker secrets or local .dev.vars; never commit API keys or passwords.
 
@@ -31,4 +32,4 @@ The tests cover health/readiness, CORS, public business/review routes, approval 
 
 ## Not connected yet
 
-No production database, account authentication, email verification, review submission, moderation endpoints, object storage, or email credentials have been configured. Those are later stages and must be added with server-side authorization before real customer data is accepted.
+No production database, account authentication, email verification, review submission, moderation endpoints, object storage, or email credentials have been configured. These stages must be added with server-side authorization before real customer data is accepted.
