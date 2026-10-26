@@ -2,6 +2,7 @@ import { getBusiness, getPublicReview, listBusinesses, listPublicReviews } from 
 import { authMethodAllowed, handleAuth, isAuthPath } from "./auth.js";
 import { handleSubmission, isSubmissionPath } from "./submission-api.js";
 import { handleAdmin, isAdminPath } from "./admin-api.js";
+import { handleAccount, isAccountPath } from "./account-api.js";
 
 const DEFAULT_ALLOWED_METHODS = "GET, POST, OPTIONS";
 const DEFAULT_ALLOWED_HEADERS = "Content-Type, Authorization";
@@ -60,6 +61,12 @@ export default {
 
     if (request.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: responseHeaders(request, env) });
+    }
+
+    if (isAccountPath(url.pathname)) {
+      if (request.method !== "GET") return json(request, env, { error: "method_not_allowed" }, 405);
+      const result = await handleAccount(request, env, url.pathname);
+      return json(request, env, result.body, result.status);
     }
 
     if (isAuthPath(url.pathname)) {
