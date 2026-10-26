@@ -91,12 +91,12 @@ test("business profile hides unapproved and missing profiles", async () => {
 test("review feed returns only published public review fields", async () => {
   const review = { id: "r-1", businessName: "Acme Repairs", serviceBought: "Roof repair", rating: 5, displayName: "Anonymous reviewer", location: "Abuja", experience: "Clear communication.", isResolved: 0 };
   const db = databaseFixture({ reviewRows: [review] });
-  const response = await worker.fetch(new Request("https://api.example.test/api/reviews?limit=1"), { ...env, ...db });
+  const response = await worker.fetch(new Request("https://api.example.test/api/reviews?q=acme&limit=1"), { ...env, ...db });
   const result = await response.json();
   assert.equal(response.status, 200);
   assert.deepEqual(result.reviews, [review]);
   assert.equal(db.queries[0].values[0], 1);
-  assert.match(db.queries[0].sql, /r\.status IN/);
+  assert.match(db.queries[0].sql, /r\.status IN \\('published', 'resolved'\\)/);
   assert.doesNotMatch(db.queries[0].sql, /review_private_details|complainant_email|complainant_phone/i);
 });
 
