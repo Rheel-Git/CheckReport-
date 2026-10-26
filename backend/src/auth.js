@@ -84,7 +84,7 @@ async function register(request, env) {
     return { status: 202, body: { status: "check_email_if_account_is_new" } };
   } catch (error) {
     if (error?.cause?.message?.includes("password_out_of_range") || error?.message === "password_out_of_range") {
-      return { status: 400, body: { error: "password_must_be_15_to_256_bytes" } };
+      return { status: 400, body: { error: "password_must_be_8_to_256_bytes" } };
     }
     if (/UNIQUE constraint failed: users\.email/i.test(error?.message || "")) {
       return { status: 202, body: { status: "check_email_if_account_is_new" } };
