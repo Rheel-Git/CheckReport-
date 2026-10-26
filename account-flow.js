@@ -192,7 +192,9 @@
       const draftResult = await resumeDraft(data.user);
       if (draftResult && draftResult !== "submitted") { error.textContent = draftResult; return; }
       if (data.user.role === "admin") { location.href = "admin.html"; return; }
-      if (!draftResult) { closeModal(); toast(`Signed in as ${data.user.email}. Account dashboards will connect in a later stage.`); }
+      if (data.user.role === "business") { location.href = "business-dashboard.html"; return; }
+      if (data.user.role === "customer") { location.href = "user-dashboard.html"; return; }
+      closeModal(); toast("Your account type is not recognized. Contact CheckReport support.");
     } catch (reason) { error.textContent = errorText(reason); }
   };
 
