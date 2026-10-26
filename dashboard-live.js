@@ -15,7 +15,7 @@
   const stars = (value) => "★".repeat(Math.max(0, Math.min(5, Number(value) || 0)) || 0) +
     "☆".repeat(5 - Math.max(0, Math.min(5, Number(value) || 0)));
   const statusLabel = (status) => ({
-    pending: "Awaiting moderation", published: "Published", resolved: "Resolved",
+    pending: "Awaiting moderation", approved: "Approved", published: "Published", resolved: "Resolved",
     hidden: "Hidden", deleted: "Removed",
   })[status] || "Status unavailable";
   const statusClass = (status) => ({
