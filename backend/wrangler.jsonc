@@ -9,5 +9,12 @@
   "vars": {
     "APP_ENV": "preview",
     "ALLOWED_ORIGINS": "http://localhost:8080,https://rheel-git.github.io"
-  }
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "checkreport-preview",
+      "database_id": "7c45623f-7e54-4128-930d-49090b1ca5bc"
+    }
+  ]
 }
