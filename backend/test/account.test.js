@@ -12,7 +12,7 @@ function mockDb(user, customerReviews = [], businesses = [], businessReviews = [
           return {
             first: async () => sql.includes("FROM sessions s") ? user : null,
             all: async () => {
-              if (sql.includes("FROM reviews r") && sql.includes("LEFT JOIN review_private_details")) {
+              if (sql.includes("FROM reviews r") && sql.includes("WHERE r.user_id = ?")) {
                 assert.equal(values[0], user.id);
                 return { results: customerReviews };
               }
