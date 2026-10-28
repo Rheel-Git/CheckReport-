@@ -11,8 +11,9 @@ test("passwords are stored as salted PBKDF2 digests and verified", async () => {
   assert.equal(encoded.includes("a sufficiently long"), false);
 });
 
-test("password policy requires 15 characters and limits encoded bytes", async () => {
-  await assert.rejects(hashPassword("too short"), /password_out_of_range/);
+test("password policy requires 8 characters and limits encoded bytes", async () => {
+  await assert.rejects(hashPassword("short7!"), /password_out_of_range/);
+  assert.match(await hashPassword("goodpass8"), /^pbkdf2-sha256\$600000\$/);
   await assert.rejects(hashPassword("é".repeat(129)), /password_out_of_range/);
 });
 
